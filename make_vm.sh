@@ -12,10 +12,11 @@ MEMORY=512
 DISKSIZE=8
 
 DEBIAN_LOCATION=http://ftp.us.debian.org/debian/dists/wheezy/main/installer-amd64/
-PRESEED_MAIN_TEMPLATE=/root/creation_scripts/vmtemplates/debian7_preseed.cfg
-PRESEED_CCLUB=/root/creation_scripts/vmtemplates/debian7_preseed_cclub.cfg
-CCLUB_APT_PUBKEY=/root/creation_scripts/vmtemplates/cclub_apt_pubkey
-PRESEED_CCLUB_SECRETS=/root/creation_scripts/vmtemplates/debian7_preseed_cclub_secrets.cfg
+PRESEED_MAIN_TEMPLATE=/root/creation_scripts/materials/debian7_preseed.cfg
+
+# this root pubkey should be in a package! that'd be cool!
+# TODO make a package with it! yeah! cclub-keyring, perhaps!
+CCLUB_ROOT_PUBKEY=/root/creation_scripts/materials/cclub_root.pub
 
 while [ -z "${VM_HOSTNAME:-}" ]; do
     read -e -p "VM hostname: " VM_HOSTNAME
@@ -29,6 +30,7 @@ while [ -z "${VM_IP:-}" ]; do
 	unset VM_IP
     fi
 done
+LASTOCTET=$(echo $VM_IP | cut -d . -f 4)
 
 MAC_ADDRESS=00:00:80:ed:9d:$(printf '%x' $LASTOCTET)
 
@@ -53,9 +55,6 @@ echo "$VM_HOSTNAME as a hostname"
 echo "$VM_IP as an IP address"
 echo "$MAC_ADDRESS as a MAC address"
 echo "$VM_CCLUB to being Clubified"
-echo "PLEASE NOTE: You can disconnect from the VM console with Ctrl-]
-during the install, and reconnect with \"virsh console $VM_HOSTNAME\",
-so you don't have to be bored watching it."
 
 read -p "Continue (yes/no)? " choice
 case "$choice" in 
@@ -63,19 +62,19 @@ case "$choice" in
   * ) exit;;
 esac
 
+echo "Connect with \"virsh console $VM_HOSTNAME\" elsewhere to watch \
+the install progress."
+
 # make the preseed.cfg
 TMPDIR=$(mktemp -d)
 cp $PRESEED_MAIN_TEMPLATE $TMPDIR/preseed.cfg 
 sed -i "s/REPLACE_WITH_IP/$VM_IP/" $TMPDIR/preseed.cfg 
 sed -i "s/REPLACE_WITH_HOSTNAME/$VM_HOSTNAME/" $TMPDIR/preseed.cfg
-sed -i "s/REPLACE_WITH_ROOTPW_HASH/$VM_ROOT_PASSWORD_HASH/" $TMPDIR/preseed.cfg
+sed -i "s/REPLACE_WITH_ROOTPW_HASH/$(echo $VM_ROOT_PASSWORD_HASH | sed -e 's/[\/&]/\\&/g')/" $TMPDIR/preseed.cfg
 
-if [[ "$VM_CCLUB" == "yes" ]]; then
-    cp $PRESEED_CCLUB $TMPDIR/extra_preseed.cfg 
-    cp $PRESEED_CCLUB_SECRETS $TMPDIR/cclub_secrets.cfg
-fi
-
-exec virt-install \
+virt-install \
+    --noautoconsole \
+    --wait=-1 \
     --name=$VM_HOSTNAME \
     --vcpus=$NUMCPUS \
     --ram=$MEMORY \
@@ -84,7 +83,16 @@ exec virt-install \
     --location=$DEBIAN_LOCATION \
     --extra-args="console=ttyS0" \
     --initrd-inject=$TMPDIR/preseed.cfg \
-    --initrd-inject=$TMPDIR/extra_preseed.cfg \
-    --initrd-inject=$TMPDIR/cclub_secrets.cfg \
-    --initrd-inject=$CCLUB_APT_PUBKEY
+    --initrd-inject=$CCLUB_ROOT_PUBKEY
 
+CCLUB_ROOT_PRVKEY=/root/secret/cclub_root
+CCLUB_SECRETS=/root/creation_scripts/secret/
+CCLUB_CLUBIFY_SCRIPT=/root/creation_scripts/clubify.sh
+
+if [[ "$VM_CCLUB" == "yes" ]]; then
+    "Waiting for VM to reboot before starting Clubification..."
+    sleep 15
+    # TODO this secret dir should live in AFS
+    scp -o StrictHostKeyChecking=no -i $CCLUB_ROOT_PRVKEY -r $CCLUB_SECRETS root@$VM_IP:/root/
+    ssh -o StrictHostKeyChecking=no -i $CCLUB_ROOT_PRVKEY root@$VM_IP "bash -s" < $CCLUB_CLUBIFY_SCRIPT
+fi
