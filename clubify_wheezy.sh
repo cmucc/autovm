@@ -7,7 +7,7 @@ aptitude install cclub-keyring <<< "Yes"
 aptitude update 
 
 # add our configuration
-aptitude install cclub-debconf-settings 
+aptitude install -y cclub-debconf-settings 
 
 # some configuration for packages that hasn't yet made it into cclub-debconf-settings
 debconf-set-selections <<EOF
@@ -25,7 +25,7 @@ openafs-client openafs-client/cachesize string 50000
 EOF
 
 # upgrade
-aptitude dist-upgrade 
+aptitude -y dist-upgrade 
 
 # and finally, install the necessary club packages
 # this is a minimal set - zsh is included because it's some people's

@@ -2,6 +2,9 @@
 set -o errexit
 set -o nounset
 
+AUTOVM_DIR=/afs/club.cc.cmu.edu/service/autovm
+CLUB_SECRETS=$AUTOVM_DIR/secret/
+
 #VM_HOSTNAME=
 #VM_CCLUB=yes
 #VM_ROOT_PASSWORD_HASH=$(printf "password" | mkpasswd -s -m md5)
@@ -34,12 +37,12 @@ case "$choice" in
   yes|YES ) echo "Okay";;
   * ) exit 1;;
 esac
-VM_IP=$(/afs/club.cc.cmu.edu/service/netreg/get_ip.sh $VM_HOSTNAME)
+VM_IP=$($AUTOVM_DIR/netreg/get_ip.sh $VM_HOSTNAME)
 
 #### Create VM
 DEBIAN_LOCATION=http://ftp.us.debian.org/debian/dists/wheezy/main/installer-amd64/
-PRESEED_MAIN_TEMPLATE=/root/creation_scripts/materials/debian7_preseed.cfg
-CCLUB_ROOT_PUBKEY=/root/creation_scripts/materials/cclub_root.pub
+PRESEED_MAIN_TEMPLATE=$AUTOVM_DIR/materials/debian7_preseed.cfg
+CCLUB_ROOT_PUBKEY=$AUTOVM_DIR/materials/cclub_root.pub
 
 LASTOCTET=$(echo $VM_IP | cut -d . -f 4)
 MAC_ADDRESS=00:00:80:ed:9d:$(printf '%x' $LASTOCTET)
@@ -77,14 +80,12 @@ virt-install \
     --initrd-inject=$CCLUB_ROOT_PUBKEY
 
 #### Perform clubification
-CCLUB_ROOT_PRVKEY=/root/secret/cclub_root
-CCLUB_SECRETS=/root/creation_scripts/secret/
-CCLUB_CLUBIFY_SCRIPT=/root/creation_scripts/clubify.sh
+CCLUB_ROOT_PRVKEY=$CCLUB_SECRETS/cclub_root
+CCLUB_CLUBIFY_SCRIPT=$AUTOVM_DIR/clubify_wheezy.sh
 
 if [[ "$VM_CCLUB" == "yes" ]]; then
     echo "Waiting for VM to reboot before starting Clubification..."
     sleep 30
-    # TODO this secret dir should live in AFS
     scp -o StrictHostKeyChecking=no -i $CCLUB_ROOT_PRVKEY -r $CCLUB_SECRETS root@$VM_IP:/root/
     ssh -o StrictHostKeyChecking=no -i $CCLUB_ROOT_PRVKEY root@$VM_IP "bash -s" < $CCLUB_CLUBIFY_SCRIPT
 fi
