@@ -90,7 +90,7 @@ CCLUB_SECRETS=/root/creation_scripts/secret/
 CCLUB_CLUBIFY_SCRIPT=/root/creation_scripts/clubify.sh
 
 if [[ "$VM_CCLUB" == "yes" ]]; then
-    "Waiting for VM to reboot before starting Clubification..."
+    echo "Waiting for VM to reboot before starting Clubification..."
     sleep 15
     # TODO this secret dir should live in AFS
     scp -o StrictHostKeyChecking=no -i $CCLUB_ROOT_PRVKEY -r $CCLUB_SECRETS root@$VM_IP:/root/
