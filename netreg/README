@@ -1,0 +1,12 @@
+This file is for things with which to destroy netreg! 
+
+preregged is a list of IP addresses that have been pre-registered on
+NetReg and can be automatically allocated.
+
+in-use is a subset of preregged, a list of IP addresses that are in
+use, and a hack that will be unnecessary very soon (as the goal is to
+just use reverse DNS to detect usage)
+
+get_ip.sh gets an IP! run it for usage info!
+
+Contact sbaugh with questions
