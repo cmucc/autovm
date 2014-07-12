@@ -3,7 +3,7 @@ set -o errexit
 set -o nounset
 
 AUTOVM_DIR=/afs/club.cc.cmu.edu/service/autovm
-CLUB_SECRETS=$AUTOVM_DIR/secret/
+CCLUB_SECRETS=$AUTOVM_DIR/secret/
 
 #VM_HOSTNAME=
 #VM_CCLUB=yes
