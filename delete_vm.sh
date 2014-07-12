@@ -33,16 +33,15 @@ if [ -z "$(klist | grep admin)" ]; then
     exit 1
 fi
 
-if ! aklog club.cc.cmu.edu; then
-    echo "Failed to get AFS token, do you have AFS?"
-    exit 1
-fi
+aklog club.cc.cmu.edu
 
 ## force power off the machine
-virsh destroy $SHORTNAME
+if ! [[ "shut off" == $(virsh domstate $SHORTNAME) ]]; then
+    virsh destroy $SHORTNAME
+fi
 
 ## remove the machine from libvirt's memory
-virsh undefine $SHORTNAME --delete-all-storage
+virsh undefine $SHORTNAME --remove-all-storage
 
 ## remove the host record
 DNS_FILE=/afs/club.cc.cmu.edu/service/dns/DB.club.cc.cmu.edu
