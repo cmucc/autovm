@@ -91,3 +91,5 @@ if [[ "$VM_CCLUB" == "yes" ]]; then
 fi
 
 echo "Done!"
+echo "Connect to the VM over ssh at $VM_HOSTNAME.club.cc.cmu.edu."
+echo "Or, at $VM_IP."
