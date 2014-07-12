@@ -3,6 +3,7 @@ set -o nounset
 set -o errexit
 
 # TODO do the deletion TODOs as soon as we have reverse DNS
+NETREG_INFO_DIR=/afs/club.cc.cmu.edu/service/autovm/netreg
 
 print_usage()
 {
@@ -59,7 +60,7 @@ UNUSED_LIST_FILE=$(mktemp)
 # done  
 
 ### Get valid candidate list
-PREREGGED_LIST_FILE=/afs/club.cc.cmu.edu/service/netreg/preregged
+PREREGGED_LIST_FILE=$NETREG_INFO_DIR/preregged
 
 ### Get the intersection of the two lists
 # (this is the list of IPs that we might be able to use)
@@ -70,7 +71,7 @@ sort $PREREGGED_LIST_FILE -o $PREREGGED_LIST_FILE
 IP_LIST="$(comm -12 $PREREGGED_LIST_FILE $UNUSED_LIST_FILE)"
 
 # TODO delete these lines
-USED_LIST_FILE=/afs/club.cc.cmu.edu/service/netreg/inuse
+USED_LIST_FILE=$NETREG_INFO_DIR/inuse
 IP_LIST="$(comm -23 $PREREGGED_LIST_FILE $USED_LIST_FILE)"
 
 try_register() 
