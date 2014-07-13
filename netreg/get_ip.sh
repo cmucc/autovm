@@ -2,7 +2,6 @@
 set -o nounset
 set -o errexit
 
-# TODO do the deletion TODOs as soon as we have reverse DNS
 NETREG_INFO_DIR=/afs/club.cc.cmu.edu/service/autovm/netreg
 
 print_usage()
@@ -42,22 +41,20 @@ if ! aklog club.cc.cmu.edu; then
 fi
 
 ### Get unused IPs
-# TODO this could be sped up by caching
 UNUSED_LIST_FILE=$(mktemp)
 # for each CClub IP
 
-# TODO uncomment me
-# for i in {1..255}; do 
-#     IP=128.237.157.$i
-#     # if that IP has no reverse DNS
-#     if [ -z "$(dig +short -x $IP)" ]; then
-# 	# put it in the candidate file
-# 	echo "$IP" >> "$UNUSED_LIST_FILE"
-#     fi
-#     # slow down a little 
-#     # is this actually necessary?
-#     sleep .01
-# done  
+for i in {1..255}; do 
+    IP=128.237.157.$i
+    # if that IP has no reverse DNS
+    if [ -z "$(dig +short -x $IP)" ]; then
+	# put it in the candidate file
+	echo "$IP" >> "$UNUSED_LIST_FILE"
+    fi
+    # slow down a little 
+    # is this actually necessary?
+    sleep .01
+done  
 
 ### Get valid candidate list
 PREREGGED_LIST_FILE=$NETREG_INFO_DIR/preregged
@@ -70,10 +67,10 @@ sort $UNUSED_LIST_FILE -o $UNUSED_LIST_FILE
 sort $PREREGGED_LIST_FILE -o $PREREGGED_LIST_FILE
 IP_LIST="$(comm -12 $PREREGGED_LIST_FILE $UNUSED_LIST_FILE)"
 
-# TODO delete these lines
-USED_LIST_FILE=$NETREG_INFO_DIR/inuse
-sort $USED_LIST_FILE -o $USED_LIST_FILE
-IP_LIST="$(comm -23 $PREREGGED_LIST_FILE $USED_LIST_FILE)"
+if [ -z $IP_LIST ]; then
+    # something's not right... try looking at every IP, then
+    IP_LIST="$(cat $PREREGGED_LIST_FILE)"
+fi
 
 try_register() 
 {
@@ -86,8 +83,6 @@ for IP in $IP_LIST;
 do
     if (try_register $IP); then
 	printf $IP
-	# TODO delete this line
-	echo $IP >> $USED_LIST_FILE
 	exit 0
     fi
 done
