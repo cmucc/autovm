@@ -92,6 +92,7 @@ if [[ "$VM_CCLUB" == "yes" ]]; then
     sleep 30
     echo "let's go!"
     ssh -o StrictHostKeyChecking=no -i $CCLUB_ROOT_PRVKEY root@$VM_IP "bash -s" < $CCLUB_CLUBIFY_SCRIPT
+    echo "Note: use sudo and sudo -i to exercise root privileges."
 fi
 
 echo "Done!"
