@@ -9,14 +9,13 @@ aptitude update
 # add our configuration
 aptitude install -y cclub-debconf-settings 
 
-# some configuration for packages that hasn't yet made it into cclub-debconf-settings
+# some configuration for packages that has not yet made it into cclub-debconf-settings
 debconf-set-selections <<EOF
+nslcd nslcd/ldap-uris string ldap://ldap1.club.cc.cmu.edu/ ldap://ldap2.club.cc.cmu.edu/ ldap://ldap3.club.cc.cmu.edu/
 nslcd nslcd/ldap-base string dc=club,dc=cc,dc=cmu,dc=edu
-nslcd nslcd/ldap-starttls boolean false
-nslcd nslcd/ldap-uris string ldap://128.237.157.19/
-nslcd nslcd/ldap-auth-type select simple
-nslcd nslcd/ldap-binddn string cn=read,dc=club,dc=cc,dc=cmu,dc=edu
-nslcd nslcd/ldap-bindpw password $(cat /root/secret/ldap-read-password)
+nslcd nslcd/ldap-auth-type select none
+nslcd nslcd/ldap-starttls boolean true
+nslcd nslcd/ldap-reqcert select allow
 
 libnss-ldapd libnss-ldapd/nsswitch multiselect passwd, group
 libpam-runtime libpam-runtime/profiles multiselect krb5, unix, afs-session
