@@ -76,7 +76,7 @@ try_register()
 {
     # REQUIRES: we already have admin Kerberos token and have aklog'd for administrator AFS perms
     cd /afs/club.cc.cmu.edu/service/dns/
-    ./tinydns-edit DB.club.cc.cmu.edu DB.club.cc.cmu.edu.tmp add host $SHORTNAME.club.cc.cmu.edu $1
+    ./tinydns-edit DB.club.cc.cmu.edu DB.club.cc.cmu.edu~ add host $SHORTNAME.club.cc.cmu.edu $1
 }
 
 for IP in $IP_LIST;
