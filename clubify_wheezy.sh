@@ -33,3 +33,5 @@ aptitude -y dist-upgrade
 DEBIAN_FRONTEND=noninteractive aptitude install -y build-essential \
 heimdal-clients libpam-heimdal libnss-ldapd sudo vim emacs zsh \
 openafs-client libpam-afs-session
+
+reboot
