@@ -33,4 +33,7 @@ DEBIAN_FRONTEND=noninteractive aptitude install -y build-essential \
 heimdal-clients libpam-heimdal libnss-ldapd sudo vim emacs zsh \
 openafs-client libpam-afs-session
 
+echo '%wheel  ALL=(ALL)       ALL' > /etc/sudoers.d/wheel
+chmod 440 /etc/sudoers.d/wheel
+
 reboot
