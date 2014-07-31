@@ -19,21 +19,19 @@ nslcd nslcd/ldap-starttls boolean false
 libnss-ldapd libnss-ldapd/nsswitch multiselect passwd, group
 libpam-runtime libpam-runtime/profiles multiselect krb5, unix, afs-session
 
-openafs-client openafs-client/cachesize string 50000
+openafs-client openafs-client/cachesize string 100000
 EOF
 
 # upgrade
 aptitude -y dist-upgrade 
 
 # and finally, install the necessary club packages
-# this is a minimal set - zsh is included because it's some people's
-# default shell, and vim and emacs because some people don't know how
-# to use TRAMP
+# this is a minimal set - zsh, tcsh are included because they are some
+# people's default shell, and vim and emacs because some people don't
+# know how to use TRAMP
 DEBIAN_FRONTEND=noninteractive aptitude install -y build-essential \
-heimdal-clients libpam-heimdal libnss-ldapd sudo vim emacs zsh \
+heimdal-clients libpam-heimdal libnss-ldapd sudo vim emacs zsh tcsh \
 openafs-client libpam-afs-session
 
 echo '%wheel  ALL=(ALL)       ALL' > /etc/sudoers.d/wheel
 chmod 440 /etc/sudoers.d/wheel
-
-reboot

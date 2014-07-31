@@ -91,8 +91,29 @@ if [[ "$VM_CCLUB" == "yes" ]]; then
     printf "Waiting for VM to start before starting Clubification..."
     sleep 30
     echo "let's go!"
-    ssh -o StrictHostKeyChecking=no -i $CCLUB_ROOT_PRVKEY root@$VM_IP "bash -s" < $CCLUB_CLUBIFY_SCRIPT
-    echo "Note: use sudo and sudo -i to exercise root privileges."
+
+    ssh -o StrictHostKeyChecking=no -i $CCLUB_ROOT_PRVKEY \
+	root@$VM_IP "bash -s" < $CCLUB_CLUBIFY_SCRIPT
+
+    ssh -o StrictHostKeyChecking=no -i $CCLUB_ROOT_PRVKEY \
+	root@$VM_IP "reboot"
+    
+    # this part needs to know the Kerberos principal of the admin making the VM.
+    # It can just grab it out of the Kerb tickets already obtained if
+    # run on the host.
+    # if run on the VM, I have not yet thought of a clever and elegant
+    # way to painlessly communicate the Kerb principal to it.
+    # so I run it on the host, which is even less elegant
+    # such is life
+    kadmin ank --use-defaults -r host/$VM_HOSTNAME.club.cc.cmu.edu 
+    TMP_KEY_FILE=$(mktemp)
+    kadmin ext_keytab --keytab="$TMP_KEY_FILE" host/$VM_HOSTNAME.club.cc.cmu.edu
+    scp -o StrictHostKeyChecking=no -i $CCLUB_ROOT_PRVKEY \
+	$TMP_KEY_FILE root@$VM_IP:/etc/krb5.keytab
+    rm -f $TMP_KEY_FILE
+
+    echo "Note: use sudo and sudo -i to exercise root privileges while"
+    echo "logged in as non-root on $VM_HOSTNAME."
 fi
 
 echo "Done!"
